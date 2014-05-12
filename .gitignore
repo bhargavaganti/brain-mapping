@@ -1,0 +1,9 @@
+#idea stuff
+*.iml
+*.ipr
+*.iws
+.git
+
+#java
+*.class
+*.jar
