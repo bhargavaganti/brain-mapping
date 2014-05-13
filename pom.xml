@@ -107,6 +107,11 @@
             <version>0.9</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-math</artifactId>
+            <version>0.9</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>16.0.1</version>
@@ -147,7 +152,8 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.apache.hadoop.examples.WordCount</mainClass>
+                            <!--<mainClass>edu.cooper.cloud.WordCount</mainClass>-->
+                            <mainClass>edu.cooper.cloud.MahoutTest</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -218,9 +224,9 @@
                     <debug>true</debug>
                     <debuglevel></debuglevel>
                     <optimize>false</optimize>
-                    <compilerArgs>
-                        <arg>-Xlint</arg>
-                    </compilerArgs>
+                    <!--<compilerArgs>-->
+                        <!--<arg>-Xlint</arg>-->
+                    <!--</compilerArgs>-->
                 </configuration>
             </plugin>
             <plugin>

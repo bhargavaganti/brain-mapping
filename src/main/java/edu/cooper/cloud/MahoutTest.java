@@ -3,8 +3,14 @@ package edu.cooper.cloud;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.*;
-import org.apache.mahout.classifier.*;
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
+import org.apache.mahout.cf.taste.impl.recommender.CachingRecommender;
+import org.apache.mahout.cf.taste.impl.recommender.slopeone.SlopeOneRecommender;
+import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
+//import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
 //import org.apache.mahout.classifier.BayesFileFormatter;
 //import org.apache.mahout.classifier.ClassifierResult;
 //import org.apache.mahout.classifier.bayes.TrainClassifier;
@@ -112,13 +118,17 @@ public class MahoutTest {
 //    }
 
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException, TasteException {
+
+        DataModel model = new FileDataModel(new File("myData.dat"));
+        Recommender recommender = new SlopeOneRecommender(model);
+        Recommender cachingRecommender = new CachingRecommender(recommender);
+
         System.out.println("Hello World ");
         System.out.println("Training");
         for (String word: args){
             System.out.println(word);
         }
         org.apache.mahout.classifier.bayes.interfaces.Algorithm algorithm = new BayesAlgorithm();
-
     }
 }
