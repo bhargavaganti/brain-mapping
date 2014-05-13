@@ -199,7 +199,7 @@ public class MultiFileWordCount extends Configured implements Tool {
     }
 
     /**
-     * This Mapper is similar to the one in {@link WordCount.MapClass}.
+     * This Mapper is similar to the one in {@link Normalize.MapClass}.
      */
     public static class MapClass extends
             Mapper<WordOffset, Text, Text, IntWritable> {
@@ -243,7 +243,7 @@ public class MultiFileWordCount extends Configured implements Tool {
 
         //use the defined mapper
         job.setMapperClass(MapClass.class);
-        //use the edu.cooper.cloud.WordCount Reducer
+        //use the edu.cooper.cloud.Normalize Reducer
         job.setCombinerClass(IntSumReducer.class);
         job.setReducerClass(IntSumReducer.class);
 

@@ -7,3 +7,6 @@
 #java
 *.class
 *.jar
+
+#data
+*.csv
