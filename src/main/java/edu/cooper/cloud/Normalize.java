@@ -31,7 +31,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 public class Normalize {
 
 
-
     public static class NormalizeMapper extends Mapper <LongWritable, DoubleArrayWritable, IntWritable,DoubleArrayWritable> {
 
         private int dataDimFrom;
