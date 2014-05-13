@@ -6,22 +6,17 @@ import java.util.*;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.mahout.cf.taste.common.TasteException;
-import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
-import org.apache.mahout.cf.taste.impl.model.file.*;
-import org.apache.mahout.cf.taste.impl.neighborhood.*;
-import org.apache.mahout.cf.taste.impl.recommender.*;
-import org.apache.mahout.cf.taste.impl.similarity.*;
-import org.apache.mahout.cf.taste.model.*;
-import org.apache.mahout.cf.taste.neighborhood.*;
-import org.apache.mahout.cf.taste.recommender.*;
-import org.apache.mahout.cf.taste.similarity.*;
+import org.apache.mahout.classifier.bayes.algorithm.BayesAlgorithm;
 import org.apache.mahout.classifier.bayes.common.BayesParameters;
-import org.apache.mahout.classifier.bayes.mapreduce.bayes.BayesDriver;
-import org.apache.mahout.classifier.naivebayes.NaiveBayesModel;
-import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.classifier.bayes.datastore.InMemoryBayesDatastore;
+import org.apache.mahout.classifier.bayes.exceptions.InvalidDatastoreException;
+import org.apache.mahout.classifier.bayes.interfaces.Algorithm;
+import org.apache.mahout.classifier.bayes.interfaces.Datastore;
+import org.apache.mahout.classifier.bayes.model.ClassifierContext;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.vectors.csv.CSVVectorIterator;
@@ -30,7 +25,7 @@ import org.apache.mahout.classifier.bayes.*;
 
 public class MahoutTest {
 
-    public static void main(String[] args) throws  IOException, TasteException {
+    public static void main(String[] args) throws IOException, TasteException, InvalidDatastoreException {
 
         System.out.println("Hello World ");
         System.out.println("Training");
@@ -54,11 +49,10 @@ public class MahoutTest {
 
         fs = FileSystem.get(conf);
         Path path = new Path("output/out.seq");
-        writer = new SequenceFile.Writer(fs, conf, path, Text.class, VectorWritable.class);
+        writer = new SequenceFile.Writer(fs, conf, path, Text.class, Text.class);
 
         VectorWritable vec = new VectorWritable();
         for (NamedVector vector : vectors) {
-
             vec.set(vector);
             writer.append(new Text(vector.getName()), vec);
         }
@@ -74,7 +68,15 @@ public class MahoutTest {
         bayesParameters.set( "dataSource", "hdfs" );
         bayesParameters.set("basePath", output);
 
+//        Train the parameters
         TrainClassifier.trainNaiveBayes(new Path(input), new Path(output), bayesParameters);
+
+//        Make Classifier
+        Algorithm algorithm = new BayesAlgorithm();
+        Datastore datastore = new InMemoryBayesDatastore( bayesParameters );
+        ClassifierContext classifier = new ClassifierContext( algorithm, datastore );
+        classifier.initialize();
+
 
 
 //
