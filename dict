@@ -1,0 +1,14 @@
+Label bindings for Relation iris
+class	4
+sepallength	0
+sepalwidth	1
+petalwidth	3
+petallength	2
+
+Values for nominal attributes
+1
+class
+3
+Iris-virginica	3
+Iris-setosa	1
+Iris-versicolor	2
