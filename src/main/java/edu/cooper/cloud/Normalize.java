@@ -19,6 +19,8 @@ package edu.cooper.cloud;
 
 import java.io.IOException;
 import java.util.Map;
+
+import org.apache.commons.math.util.DoubleArray;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
@@ -29,6 +31,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 public class Normalize {
+
 
 
     public static class NormalizeMapper extends Mapper <LongWritable, DoubleArrayWritable, IntWritable,DoubleArrayWritable> {
@@ -176,6 +179,7 @@ public class Normalize {
         job.setReducerClass(NormalizeReducer.class);
         job.setOutputKeyClass(IntWritable.class);
         job.setOutputValueClass(DoubleArrayWritable.class);
+//        job.setInputFormatClass(new FileInputFormat<IntWritable,DoubleArrayWritable>());
 
         Path inputPath = new Path(input);
         System.out.println(inputPath);
@@ -185,5 +189,9 @@ public class Normalize {
         FileInputFormat.addInputPath(job, inputPath);
         FileOutputFormat.setOutputPath(job, outputPath);
         System.exit(job.waitForCompletion(true) ? 0 : 1);
+
+//        Use means and std dev to normalize the data
+
+
     }
 }
