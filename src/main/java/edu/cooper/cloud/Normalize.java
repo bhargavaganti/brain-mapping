@@ -28,13 +28,14 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 public class Normalize {
 
 
 
-    public static class NormalizeMapper extends Mapper <LongWritable, DoubleArrayWritable, IntWritable,DoubleArrayWritable> {
+    public static class NormalizeMapper extends Mapper <LongWritable, DoubleArrayWritable, IntWritable, DoubleArrayWritable> {
 
         private int dataDimFrom;
         private int dataDimTo;
@@ -58,7 +59,7 @@ public class Normalize {
             DoubleWritable[] outArray = new DoubleWritable[universeSize*2];
             for (int c = 0; c < universeSize; c++) {
                 outArray[c] = new DoubleWritable(
-                        array.get(c+dataDimFrom).get() / samplesCount);
+                        array.get(c+dataDimFrom).get() / samplesCount); //Mean
             }
             for (int c = universeSize; c < universeSize*2; c++) {
                 double val = array.get(c-universeSize+dataDimFrom).get();
@@ -68,6 +69,47 @@ public class Normalize {
         }
 
     }
+
+    public static class NormalizeCombiner extends Reducer <IntWritable, DoubleArrayWritable, IntWritable, DoubleArrayWritable> {
+
+        private int dataDimFrom;
+        private int dataDimTo;
+        private int universeSize;
+
+        @Override
+        protected void setup(Context context) throws IOException {
+            Configuration conf = context.getConfiguration();
+            dataDimFrom = conf.getInt("dataDimFrom", 0);
+            dataDimTo = conf.getInt("dataDimTo", 0);
+            universeSize = dataDimTo - dataDimFrom + 1;
+        }
+
+        @Override
+        public void reduce(
+                IntWritable column,
+                Iterable<DoubleArrayWritable> partialSums,
+                Context context) throws IOException, InterruptedException {
+            DoubleWritable[] outArray = new DoubleWritable[universeSize*2];
+            boolean isFirst = true;
+            for (DoubleArrayWritable partialSum : partialSums) {
+                for (int i = 0; i < universeSize*2; i++) {
+                    if (!isFirst) {
+                        outArray[i].set(outArray[i].get()
+                                + partialSum.get(i).get());
+                    } else {
+                        outArray[i]
+                                = new DoubleWritable(partialSum.get(i).get());
+                    }
+                }
+                isFirst = false;
+            }
+            context.write(column, new DoubleArrayWritable(outArray));
+        }
+
+    }
+
+
+
 
     public static class NormalizeReducer extends Reducer <IntWritable, DoubleArrayWritable, IntWritable, DoubleArrayWritable> {
 
@@ -112,43 +154,7 @@ public class Normalize {
 
 
 
-    public static class NormalizeCombiner extends Reducer <IntWritable, DoubleArrayWritable, IntWritable, DoubleArrayWritable> {
 
-        private int dataDimFrom;
-        private int dataDimTo;
-        private int universeSize;
-
-        @Override
-        protected void setup(Context context) throws IOException {
-            Configuration conf = context.getConfiguration();
-            dataDimFrom = conf.getInt("dataDimFrom", 0);
-            dataDimTo = conf.getInt("dataDimTo", 0);
-            universeSize = dataDimTo - dataDimFrom + 1;
-        }
-
-        @Override
-        public void reduce(
-                IntWritable column,
-                Iterable<DoubleArrayWritable> partialSums,
-                Context context) throws IOException, InterruptedException {
-            DoubleWritable[] outArray = new DoubleWritable[universeSize*2];
-            boolean isFirst = true;
-            for (DoubleArrayWritable partialSum : partialSums) {
-                for (int i = 0; i < universeSize*2; i++) {
-                    if (!isFirst) {
-                        outArray[i].set(outArray[i].get()
-                                + partialSum.get(i).get());
-                    } else {
-                        outArray[i]
-                                = new DoubleWritable(partialSum.get(i).get());
-                    }
-                }
-                isFirst = false;
-            }
-            context.write(column, new DoubleArrayWritable(outArray));
-        }
-
-    }
 
     public static void main(String[] args) throws Exception {
 
@@ -186,7 +192,8 @@ public class Normalize {
         Path outputPath = new Path(output);
         System.out.println(outputPath);
 
-        FileInputFormat.addInputPath(job, inputPath);
+        NLineInputFormat.addInputPath(job,inputPath);
+//        FileInputFormat.addInputPath(job, inputPath);
         FileOutputFormat.setOutputPath(job, outputPath);
         System.exit(job.waitForCompletion(true) ? 0 : 1);
 

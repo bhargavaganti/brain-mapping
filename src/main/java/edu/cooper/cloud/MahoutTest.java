@@ -1,22 +1,23 @@
 package edu.cooper.cloud;
 
 
-import java.io.*;
-import java.util.*;
-
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.classifier.AbstractVectorClassifier;
-import org.apache.mahout.classifier.ClassifierResult;
-import org.apache.mahout.classifier.naivebayes.*;
+import org.apache.mahout.classifier.naivebayes.NaiveBayesModel;
+import org.apache.mahout.classifier.naivebayes.StandardNaiveBayesClassifier;
 import org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob;
 import org.apache.mahout.math.NamedVector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.utils.vectors.csv.CSVVectorIterator;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MahoutTest {
@@ -55,8 +56,7 @@ public class MahoutTest {
         }
         writer.close();
 
-
-
+        
         TrainNaiveBayesJob trainNaiveBayes = new TrainNaiveBayesJob();
         trainNaiveBayes.setConf(conf);
         String[] arguments = new String[] { "--input", seqOut, "--output", "out/", "-el", "--tempDir", "tmp/" };
@@ -64,7 +64,7 @@ public class MahoutTest {
 
 //        https://svn.apache.org/repos/asf/mahout/tags/mahout-0.7/core/src/test/java/org/apache/mahout/classifier/naivebayes/NaiveBayesTest.java
         NaiveBayesModel nbMobel = NaiveBayesModel.materialize(new Path(seqOut), conf);
-        AbstractVectorClassifier classifier = new StandardNaiveBayesClassifier(nbMobel);
+//        AbstractVectorClassifier classifier = new StandardNaiveBayesClassifier(nbMobel);
 
 
 
