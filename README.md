@@ -3,6 +3,7 @@ Distributed Neurophysiological Data Analysis
 
 This project attempts to solve the [DecMeg2014 - Decoding the Human Brain](http://www.kaggle.com/c/decoding-the-human-brain) Machine Learning competition. The goal of this competition is to predict the category of a visual stimulus presented to a subject from the concurrent brain activity. Specifically, the data provided to us is a large corpus of Magnetoencephalography (MEG) data taken from 23 patients. Each patient was shown images of a face as well as images of a scrambled face. The 306 MEG time series segments were recorded at a 1kHz sampling rate. A visualization of the type of data we take as input can be seen here:
 
+![Distributed Neurophysiological Data Analysis](https://raw.githubusercontent.com/schauhan19/CloudFinal/master/MEG_data.png)
 ![Distributed Neurophysiological Data Analysis](https://raw.githubusercontent.com/schauhan19/brain-mapping/master/MEG_data.png)
 
 Because the corpus of data is many gigabytes large, it is suitable to apply a distributed approach to solving this problem. We chose to use hadoop and mahout for our solution, which has several steps that take use the input data to produce an output file (in csv format) of classified test cases:
