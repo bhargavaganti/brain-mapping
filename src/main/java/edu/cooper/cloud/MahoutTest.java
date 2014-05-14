@@ -14,11 +14,14 @@ import org.apache.mahout.classifier.AbstractVectorClassifier;
 import org.apache.mahout.classifier.ClassifierResult;
 import org.apache.mahout.classifier.naivebayes.*;
 import org.apache.mahout.classifier.naivebayes.training.TrainNaiveBayesJob;
+import org.apache.mahout.math.NamedVector;
+import org.apache.mahout.math.VectorWritable;
+import org.apache.mahout.utils.vectors.csv.CSVVectorIterator;
 
 
 public class MahoutTest {
 
-    public static void main(String[] args) throws IOException, TasteException {
+    public static void main(String[] args) throws Exception {
 
         System.out.println("Hello World ");
         System.out.println("Training");
@@ -27,38 +30,45 @@ public class MahoutTest {
         }
 
         String input = "datasets/iris.data";
+        String seqOut = "output/out.seq";
         String output= "output/out.out";
 
+        BufferedReader reader = new BufferedReader(new FileReader(input));
         FileSystem fs = null;
         SequenceFile.Writer writer;
         Configuration conf = new Configuration();
+
+        CSVVectorIterator it = new CSVVectorIterator(reader);
+        List<NamedVector> vectors = new ArrayList<NamedVector>();
+        while(it.hasNext()){
+            vectors.add(new NamedVector(it.next(),"Label"));
+        }
+
+        fs = FileSystem.get(conf);
+        Path path = new Path(seqOut);
+        writer = new SequenceFile.Writer(fs, conf, path, Text.class, VectorWritable.class);
+
+        VectorWritable vec = new VectorWritable();
+        for (NamedVector vector : vectors) {
+            vec.set(vector);
+            writer.append(new Text(vector.getName()), vec);
+        }
+        writer.close();
+
+
+
         TrainNaiveBayesJob trainNaiveBayes = new TrainNaiveBayesJob();
         trainNaiveBayes.setConf(conf);
-//        trainNaiveBayes.run()l
+        String[] arguments = new String[] { "--input", seqOut, "--output", "out/", "-el", "--tempDir", "tmp/" };
+        trainNaiveBayes.run(arguments);
+
 //        https://svn.apache.org/repos/asf/mahout/tags/mahout-0.7/core/src/test/java/org/apache/mahout/classifier/naivebayes/NaiveBayesTest.java
-        NaiveBayesModel nbMobel = NaiveBayesModel.fromMRTrainerOutput(new Path(output), conf);
+        NaiveBayesModel nbMobel = NaiveBayesModel.materialize(new Path(seqOut), conf);
         AbstractVectorClassifier classifier = new StandardNaiveBayesClassifier(nbMobel);
 
 
 
-//        BufferedReader reader = new BufferedReader(new FileReader(output));
 
-//        CSVVectorIterator it = new CSVVectorIterator(reader);
-//        List<NamedVector> vectors = new ArrayList<NamedVector>();
-//        while(it.hasNext()){
-//            vectors.add(new NamedVector(it.next(),"Test"));
-//        }
-//
-//        fs = FileSystem.get(conf);
-//        Path path = new Path("output/out.seq");
-//        writer = new SequenceFile.Writer(fs, conf, path, Text.class, VectorWritable.class);
-//
-//        VectorWritable vec = new VectorWritable();
-//        for (NamedVector vector : vectors) {
-//            vec.set(vector);
-//            writer.append(new Text(vector.getName()), vec);
-//        }
-//        writer.close();
 
 //        BayesParameters bayesParameters = new BayesParameters();
 //        bayesParameters.setGramSize( 1 );
